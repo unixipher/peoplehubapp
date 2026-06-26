@@ -463,6 +463,17 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
             </div>
           </div>
 
+          {/* Float Action Trigger */}
+          <div className="my-2">
+            <button
+              onClick={() => setShowApplyForm(true)}
+              className="w-full py-4 bg-primary text-white font-bold rounded-2xl text-sm tracking-wider active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 shadow-md shadow-primary/10"
+            >
+              <Plus className="w-5 h-5" />
+              <span>New Expense Claim</span>
+            </button>
+          </div>
+
           {/* Expense History List */}
           <div className="flex flex-col gap-3">
             <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">
@@ -516,16 +527,7 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
             )}
           </div>
 
-          {/* Float Action Trigger */}
-          <div className="mt-2">
-            <button
-              onClick={() => setShowApplyForm(true)}
-              className="w-full py-4 bg-primary text-white font-bold rounded-2xl text-sm tracking-wider active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 shadow-md shadow-primary/10"
-            >
-              <Plus className="w-5 h-5" />
-              <span>New Expense Claim</span>
-            </button>
-          </div>
+
 
         </div>
       )}
