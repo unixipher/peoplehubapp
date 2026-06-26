@@ -11,11 +11,15 @@ import HolidaysView from './components/HolidaysView';
 import LeavesView from './components/LeavesView';
 import ExpensesView from './components/ExpensesView';
 import ProfileView from './components/ProfileView';
+import { useBackgroundSync } from './hooks/useBackgroundSync';
 import { Loader2 } from 'lucide-react';
 
 export default function Home() {
   const { session, isAuthenticated, loading, login, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Trigger background prefetching and syncing
+  useBackgroundSync(session, isAuthenticated);
 
   // Register the PWA service worker
   useEffect(() => {
