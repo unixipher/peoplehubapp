@@ -39,6 +39,7 @@ export default function HolidaysView({ session }: HolidaysViewProps) {
       });
 
       setHolidays(list);
+      localStorage.setItem('ph_cache_holidays', JSON.stringify(list));
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err.message || 'Failed to fetch holiday list');
@@ -49,7 +50,16 @@ export default function HolidaysView({ session }: HolidaysViewProps) {
   };
 
   useEffect(() => {
-    fetchHolidays();
+    const cached = localStorage.getItem('ph_cache_holidays');
+    if (cached) {
+      try {
+        setHolidays(JSON.parse(cached));
+        setIsLoading(false);
+      } catch (e) {
+        console.error('Failed to parse cached holidays', e);
+      }
+    }
+    fetchHolidays(!!cached);
   }, [session]);
 
   const formatDateBox = (dateStr: string) => {

@@ -43,8 +43,8 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const loadData = async () => {
-    setIsLoading(true);
+  const loadData = async (silent = false) => {
+    if (!silent) setIsLoading(true);
     setErrorMsg(null);
     try {
       // Fetch currencies (gracefully ignore errors)
@@ -86,6 +86,10 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
 
       setExpenses(expensesList);
       setCategories(categoriesList);
+      
+      localStorage.setItem('ph_cache_expenses', JSON.stringify(expensesList));
+      localStorage.setItem('ph_cache_expense_categories', JSON.stringify(categoriesList));
+
       if (categoriesList.length > 0) {
         setSelectedCategoryId(categoriesList[0].id.toString());
       }
@@ -98,7 +102,23 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
   };
 
   useEffect(() => {
-    loadData();
+    const cachedExpenses = localStorage.getItem('ph_cache_expenses');
+    const cachedCategories = localStorage.getItem('ph_cache_expense_categories');
+    if (cachedExpenses && cachedCategories) {
+      try {
+        const expensesData = JSON.parse(cachedExpenses);
+        const categoriesData = JSON.parse(cachedCategories);
+        setExpenses(expensesData);
+        setCategories(categoriesData);
+        if (categoriesData.length > 0) {
+          setSelectedCategoryId(categoriesData[0].id.toString());
+        }
+        setIsLoading(false);
+      } catch (e) {
+        console.error('Failed to parse cached expenses', e);
+      }
+    }
+    loadData(!!(cachedExpenses && cachedCategories));
   }, [session]);
 
   const handleApplySubmit = async (e: React.FormEvent) => {

@@ -69,12 +69,27 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
          record.clock_out_time.toString().toLowerCase() === 'null');
       
       setIsClockedIn(clockedIn);
+      localStorage.setItem('ph_cache_today_attendance', JSON.stringify(record));
     } catch (err) {
       console.error('Failed to load active attendance status:', err);
     }
   };
 
   useEffect(() => {
+    const cached = localStorage.getItem('ph_cache_today_attendance');
+    if (cached) {
+      try {
+        const record = JSON.parse(cached);
+        setActiveAttendanceRecord(record);
+        const clockedIn = record !== null && 
+          (!record.clock_out_time || 
+           record.clock_out_time.toString().trim() === '' || 
+           record.clock_out_time.toString().toLowerCase() === 'null');
+        setIsClockedIn(clockedIn);
+      } catch (e) {
+        console.error('Failed to parse cached today attendance status:', e);
+      }
+    }
     fetchAttendanceStatus();
   }, [session]);
 

@@ -42,6 +42,7 @@ export default function AttendanceView({ session }: AttendanceViewProps) {
       });
 
       setLogs(records);
+      localStorage.setItem('ph_cache_attendance_logs', JSON.stringify(records));
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err.message || 'Failed to fetch attendance history');
@@ -52,7 +53,16 @@ export default function AttendanceView({ session }: AttendanceViewProps) {
   };
 
   useEffect(() => {
-    fetchLogs();
+    const cached = localStorage.getItem('ph_cache_attendance_logs');
+    if (cached) {
+      try {
+        setLogs(JSON.parse(cached));
+        setIsLoading(false);
+      } catch (e) {
+        console.error('Failed to parse cached attendance logs', e);
+      }
+    }
+    fetchLogs(!!cached);
   }, [session]);
 
   const formatDateBox = (timeStr: string) => {

@@ -41,8 +41,8 @@ export default function LeavesView({ session, onBackToDashboard }: LeavesViewPro
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
 
-  const loadData = async () => {
-    setIsLoading(true);
+  const loadData = async (silent = false) => {
+    if (!silent) setIsLoading(true);
     setErrorMsg(null);
     try {
       const fetchedLeaves = await ApiService.getLeaves(session.baseUrl, session.token);
@@ -50,6 +50,9 @@ export default function LeavesView({ session, onBackToDashboard }: LeavesViewPro
       
       setLeaves(fetchedLeaves);
       setLeaveTypes(fetchedTypes);
+      
+      localStorage.setItem('ph_cache_leaves', JSON.stringify(fetchedLeaves));
+      localStorage.setItem('ph_cache_leave_types', JSON.stringify(fetchedTypes));
       
       if (fetchedTypes.length > 0) {
         setSelectedLeaveTypeId(fetchedTypes[0].id.toString());
@@ -63,7 +66,23 @@ export default function LeavesView({ session, onBackToDashboard }: LeavesViewPro
   };
 
   useEffect(() => {
-    loadData();
+    const cachedLeaves = localStorage.getItem('ph_cache_leaves');
+    const cachedTypes = localStorage.getItem('ph_cache_leave_types');
+    if (cachedLeaves && cachedTypes) {
+      try {
+        const leavesData = JSON.parse(cachedLeaves);
+        const typesData = JSON.parse(cachedTypes);
+        setLeaves(leavesData);
+        setLeaveTypes(typesData);
+        if (typesData.length > 0) {
+          setSelectedLeaveTypeId(typesData[0].id.toString());
+        }
+        setIsLoading(false);
+      } catch (e) {
+        console.error('Failed to parse cached leaves', e);
+      }
+    }
+    loadData(!!(cachedLeaves && cachedTypes));
   }, [session]);
 
   // Frontend Grouping Logic for stability
