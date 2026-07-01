@@ -74,9 +74,12 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
       let customFieldsList: any[] = [];
       try {
         customFieldsList = await ApiService.getExpenseCustomFields(session.baseUrl, session.token);
+        console.log('Expense custom fields fetched:', customFieldsList);
       } catch (e) {
         console.warn('Failed to load expense custom fields:', e);
       }
+      
+      console.log('Expense categories fetched:', categoriesList);
 
       // Learn currencies metadata from history records if missing, matching Flutter logic
       if (Array.isArray(expensesList)) {
