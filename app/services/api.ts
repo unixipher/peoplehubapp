@@ -278,7 +278,7 @@ class ApiService {
 
   public static async getLeaves(baseUrl: string, token: string): Promise<LeaveRecord[]> {
     const headers = this.getHeaders(baseUrl, token);
-    headers['x-target-path'] = '/api/v1/leave?limit=100';
+    headers['x-target-path'] = '/api/v1/leave?limit=200';
 
     const response = await fetch('/api/proxy', {
       method: 'GET',
