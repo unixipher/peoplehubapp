@@ -10,9 +10,9 @@ interface LoginViewProps {
 }
 
 export default function LoginView({ onLoginSuccess, loginFn }: LoginViewProps) {
-  const [url, setUrl] = useState('peoplehub.co.in');
-  const [email, setEmail] = useState('kaushal@techforsocialgood.in');
-  const [password, setPassword] = useState('Kaushal@2026');
+  const [url, setUrl] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState<{ text: string; type: 'success' | 'error' | 'warning' } | null>(null);
