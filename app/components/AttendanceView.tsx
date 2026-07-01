@@ -211,22 +211,15 @@ export default function AttendanceView({ session }: AttendanceViewProps) {
                       </div>
                     </div>
 
-                    {/* Footer Details: Badge & Coordinates if present */}
-                    <div className="flex justify-between items-center pt-2 border-t border-slate-50 dark:border-slate-800/30">
-                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80">
-                        {getWorkTypeIcon(record.work_from_type || 'Office')}
-                        <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                          {record.work_from_type || 'Office'}
-                        </span>
-                      </div>
-                      
-                      {record.currentLatitude && record.currentLongitude && (
+                    {/* Footer Details: Coordinates if present */}
+                    {record.currentLatitude && record.currentLongitude && (
+                      <div className="flex justify-end items-center pt-2 border-t border-slate-50 dark:border-slate-800/30">
                         <div className="flex items-center gap-1 text-[9px] text-slate-400 dark:text-slate-500 font-medium">
                           <MapPin className="w-2.5 h-2.5" />
                           <span>{parseFloat(record.currentLatitude).toFixed(4)}, {parseFloat(record.currentLongitude).toFixed(4)}</span>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
 
                   </div>
                 </div>
