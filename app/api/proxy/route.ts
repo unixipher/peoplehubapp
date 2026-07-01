@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   return handleProxy(request);
 }
@@ -68,6 +70,7 @@ async function handleProxy(request: NextRequest) {
       method: request.method,
       headers,
       body,
+      cache: 'no-store',
     });
 
     const dataText = await res.text();
