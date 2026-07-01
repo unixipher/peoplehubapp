@@ -57,14 +57,6 @@ export default function Sidebar({
               <Building2 className="w-5 h-5 text-primary" />
             )}
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">
-              {session.companyName || 'HRMS'}
-            </span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium truncate">
-              {session.companyTagline || 'Workplace Workspace'}
-            </span>
-          </div>
         </div>
 
         <div className="h-px bg-slate-100 dark:bg-slate-800/80 mx-2" />

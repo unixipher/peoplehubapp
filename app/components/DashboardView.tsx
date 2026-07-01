@@ -218,14 +218,6 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
               <Building2 className="w-4.5 h-4.5 text-primary" />
             )}
           </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
-              {session.companyName || 'HRMS'}
-            </span>
-            <span className="text-[9px] text-slate-400 dark:text-slate-500 truncate">
-              {session.companyTagline}
-            </span>
-          </div>
         </div>
         <button className="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-350 cursor-pointer active:scale-95 transition-transform">
           <Bell className="w-4.5 h-4.5" />

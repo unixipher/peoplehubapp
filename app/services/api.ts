@@ -357,7 +357,7 @@ class ApiService {
 
   public static async getExpenseCategories(baseUrl: string, token: string): Promise<ExpenseCategory[]> {
     const headers = this.getHeaders(baseUrl, token);
-    headers['x-target-path'] = '/api/v1/expense-category';
+    headers['x-target-path'] = '/api/v1/expense-category?limit=200';
 
     const response = await fetch('/api/proxy', {
       method: 'GET',
