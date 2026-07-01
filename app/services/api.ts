@@ -361,7 +361,7 @@ class ApiService {
 
     const response = await fetch('/api/proxy', {
       method: 'GET',
-      headers,
+      headers, 
     });
 
     return this.handleResponse(response);
