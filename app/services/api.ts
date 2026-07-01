@@ -58,6 +58,8 @@ export interface ExpenseRecord {
     currency_symbol: string;
     exchange_rate: string;
   };
+  custom_fields?: any[];
+  custom_fields_data?: Record<string, any>;
 }
 
 export interface ExpenseCategory {
@@ -343,7 +345,7 @@ class ApiService {
 
   public static async getExpenses(baseUrl: string, token: string): Promise<ExpenseRecord[]> {
     const headers = this.getHeaders(baseUrl, token);
-    headers['x-target-path'] = '/api/v1/expense?limit=100&fields=id,item_name,purchase_date,price,status,currency';
+    headers['x-target-path'] = '/api/v1/expense?limit=100&fields=id,item_name,purchase_date,price,status,currency,custom_fields,custom_fields_data';
 
     const response = await fetch('/api/proxy', {
       method: 'GET',
@@ -413,7 +415,8 @@ class ApiService {
     purchasedFrom: string,
     category: string | null,
     currencyCode: string,
-    file: File | null
+    file: File | null,
+    customFieldsData?: Record<string, any>
   ): Promise<any> {
     const headers = this.getHeaders(baseUrl, token);
     headers['x-target-path'] = '/api/v1/expense';
@@ -445,6 +448,12 @@ class ApiService {
       formData.append('bill', file, file.name);
     }
 
+    if (customFieldsData) {
+      Object.entries(customFieldsData).forEach(([key, value]) => {
+        formData.append(`custom_fields_data[${key}]`, value as any);
+      });
+    }
+
     const response = await fetch('/api/proxy', {
       method: 'POST',
       headers,
@@ -452,6 +461,22 @@ class ApiService {
     });
 
     return this.handleResponse(response);
+  }
+
+  public static async getExpenseCustomFields(baseUrl: string, token: string): Promise<any[]> {
+    const headers = this.getHeaders(baseUrl, token);
+    headers['x-target-path'] = '/api/v1/expense/custom-fields';
+
+    const response = await fetch('/api/proxy', {
+      method: 'GET',
+      headers,
+    });
+
+    const body = await response.json();
+    if (!response.ok) {
+      throw new Error(body.message || 'Failed to fetch expense custom fields');
+    }
+    return body.status === 'success' && body.data ? body.data : [];
   }
 }
 

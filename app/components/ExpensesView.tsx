@@ -40,6 +40,8 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
   const [purchaseDate, setPurchaseDate] = useState('');
   const [purchasedFrom, setPurchasedFrom] = useState('');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [customFields, setCustomFields] = useState<any[]>([]);
+  const [customFieldsValues, setCustomFieldsValues] = useState<Record<string, any>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +71,13 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
         console.warn('Failed to load expense categories (unsupported backend endpoint):', e);
       }
 
+      let customFieldsList: any[] = [];
+      try {
+        customFieldsList = await ApiService.getExpenseCustomFields(session.baseUrl, session.token);
+      } catch (e) {
+        console.warn('Failed to load expense custom fields:', e);
+      }
+
       // Learn currencies metadata from history records if missing, matching Flutter logic
       if (Array.isArray(expensesList)) {
         for (const exp of expensesList) {
@@ -86,9 +95,11 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
 
       setExpenses(expensesList);
       setCategories(categoriesList);
+      setCustomFields(customFieldsList);
       
       localStorage.setItem('ph_cache_expenses', JSON.stringify(expensesList));
       localStorage.setItem('ph_cache_expense_categories', JSON.stringify(categoriesList));
+      localStorage.setItem('ph_cache_expense_custom_fields', JSON.stringify(customFieldsList));
 
       if (categoriesList.length > 0) {
         setSelectedCategoryId(categoriesList[0].id.toString());
@@ -104,12 +115,16 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
   useEffect(() => {
     const cachedExpenses = localStorage.getItem('ph_cache_expenses');
     const cachedCategories = localStorage.getItem('ph_cache_expense_categories');
+    const cachedCustomFields = localStorage.getItem('ph_cache_expense_custom_fields');
     if (cachedExpenses && cachedCategories) {
       try {
         const expensesData = JSON.parse(cachedExpenses);
         const categoriesData = JSON.parse(cachedCategories);
         setExpenses(expensesData);
         setCategories(categoriesData);
+        if (cachedCustomFields) {
+          setCustomFields(JSON.parse(cachedCustomFields));
+        }
         if (categoriesData.length > 0) {
           setSelectedCategoryId(categoriesData[0].id.toString());
         }
@@ -151,7 +166,8 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
         purchasedFrom,
         selectedCategoryId || null,
         currency,
-        receiptFile
+        receiptFile,
+        customFieldsValues
       );
 
       // Reset form
@@ -159,6 +175,7 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
       setPrice('');
       setPurchasedFrom('');
       setReceiptFile(null);
+      setCustomFieldsValues({});
       if (fileInputRef.current) fileInputRef.current.value = '';
       setSuccessMsg('Expense claim submitted successfully');
       setShowApplyForm(false);
@@ -374,6 +391,104 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
             />
           </div>
 
+          {/* Custom Fields */}
+          {customFields.map((field) => {
+            const fieldKey = `field_${field.id}`;
+            const isRequired = field.required === 'yes';
+            let options: string[] = [];
+            if (field.values) {
+              try {
+                options = typeof field.values === 'string' ? JSON.parse(field.values) : field.values;
+              } catch (e) {
+                options = typeof field.values === 'string' ? field.values.split(',') : [];
+              }
+            }
+
+            return (
+              <div key={field.id} className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  {field.label} {isRequired && <span className="text-red-500">*</span>}
+                </label>
+                {field.type === 'textarea' ? (
+                  <textarea
+                    required={isRequired}
+                    value={customFieldsValues[fieldKey] || ''}
+                    onChange={(e) => setCustomFieldsValues({ ...customFieldsValues, [fieldKey]: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:text-slate-200"
+                    rows={3}
+                  />
+                ) : field.type === 'select' ? (
+                  <select
+                    required={isRequired}
+                    value={customFieldsValues[fieldKey] || ''}
+                    onChange={(e) => setCustomFieldsValues({ ...customFieldsValues, [fieldKey]: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:text-slate-200"
+                  >
+                    <option value="">Select {field.label.toLowerCase()}</option>
+                    {options.map((opt, i) => (
+                      <option key={i} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                ) : field.type === 'radio' ? (
+                  <div className="flex flex-wrap gap-4 mt-1">
+                    {options.map((opt, i) => (
+                      <label key={i} className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-350 cursor-pointer">
+                        <input
+                          type="radio"
+                          name={fieldKey}
+                          required={isRequired}
+                          checked={customFieldsValues[fieldKey] === opt}
+                          onChange={() => setCustomFieldsValues({ ...customFieldsValues, [fieldKey]: opt })}
+                          className="text-primary focus:ring-primary focus:ring-2 border-slate-300"
+                        />
+                        <span>{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : field.type === 'checkbox' ? (
+                  <div className="flex flex-wrap gap-4 mt-1">
+                    {options.map((opt, i) => {
+                      const currentVal = Array.isArray(customFieldsValues[fieldKey]) ? customFieldsValues[fieldKey] : [];
+                      return (
+                        <label key={i} className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-350 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={currentVal.includes(opt)}
+                            onChange={(e) => {
+                              const newVal = e.target.checked
+                                ? [...currentVal, opt]
+                                : currentVal.filter((v: any) => v !== opt);
+                              setCustomFieldsValues({ ...customFieldsValues, [fieldKey]: newVal });
+                            }}
+                            className="text-primary focus:ring-primary focus:ring-2 border-slate-300 rounded"
+                          />
+                          <span>{opt}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                ) : field.type === 'date' ? (
+                  <input
+                    type="date"
+                    required={isRequired}
+                    value={customFieldsValues[fieldKey] || ''}
+                    onChange={(e) => setCustomFieldsValues({ ...customFieldsValues, [fieldKey]: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:text-slate-200"
+                  />
+                ) : (
+                  <input
+                    type={field.type === 'number' ? 'number' : 'text'}
+                    required={isRequired}
+                    value={customFieldsValues[fieldKey] || ''}
+                    onChange={(e) => setCustomFieldsValues({ ...customFieldsValues, [fieldKey]: e.target.value })}
+                    placeholder={`Enter ${field.label.toLowerCase()}`}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:text-slate-200"
+                  />
+                )}
+              </div>
+            );
+          })}
+
           {/* Receipt File upload block */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -509,6 +624,18 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
                         <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-1">
                           {formatDate(expense.purchase_date)}
                         </span>
+                        {expense.custom_fields && expense.custom_fields.map((f: any) => {
+                          const fKey = `field_${f.id}`;
+                          const val = expense.custom_fields_data ? expense.custom_fields_data[fKey] : null;
+                          if (val) {
+                            return (
+                              <span key={f.id} className="text-[10px] text-slate-500 dark:text-slate-450 mt-1 font-semibold">
+                                {f.label}: <span className="font-extrabold text-slate-600 dark:text-slate-350">{Array.isArray(val) ? val.join(', ') : val}</span>
+                              </span>
+                            );
+                          }
+                          return null;
+                        })}
                       </div>
 
                       {/* Right Amount details & status */}
