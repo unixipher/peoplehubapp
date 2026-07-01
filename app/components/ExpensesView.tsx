@@ -627,7 +627,7 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
                         <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-1">
                           {formatDate(expense.purchase_date)}
                         </span>
-                        {expense.custom_fields && expense.custom_fields.map((f: any) => {
+                        {Array.isArray(expense.custom_fields) && expense.custom_fields.map((f: any) => {
                           const fKey = `field_${f.id}`;
                           const val = expense.custom_fields_data ? expense.custom_fields_data[fKey] : null;
                           if (val) {

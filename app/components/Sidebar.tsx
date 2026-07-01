@@ -43,18 +43,20 @@ export default function Sidebar({
       {/* Header section with Company Details */}
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 rounded-xl bg-primary-light dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div className="w-full flex items-center justify-start shrink-0 overflow-hidden">
             {session.companyLogo ? (
               <img 
                 src={session.companyLogo} 
                 alt="Logo" 
-                className="w-full h-full object-contain"
+                className="max-w-full max-h-full object-contain object-left"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = 'none';
                 }}
               />
             ) : (
-              <Building2 className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-xl bg-primary-light dark:bg-slate-800 flex items-center justify-center border border-slate-100 dark:border-slate-800 shadow-sm">
+                <Building2 className="w-5 h-5 text-primary" />
+              </div>
             )}
           </div>
         </div>

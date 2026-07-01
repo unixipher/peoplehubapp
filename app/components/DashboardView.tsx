@@ -211,11 +211,13 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
       {/* Mobile top header bar */}
       <header className="md:hidden flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary-light dark:bg-slate-900 overflow-hidden flex items-center justify-center shrink-0 border border-slate-200/40 dark:border-slate-800 shadow-sm">
+          <div className="h-10 flex items-center justify-start shrink-0 overflow-hidden">
             {session.companyLogo ? (
-              <img src={session.companyLogo} alt="Logo" className="w-full h-full object-contain" />
+              <img src={session.companyLogo} alt="Logo" className="max-w-[150px] max-h-full object-contain object-left" />
             ) : (
-              <Building2 className="w-4.5 h-4.5 text-primary" />
+              <div className="w-9 h-9 rounded-lg bg-primary-light dark:bg-slate-900 flex items-center justify-center border border-slate-200/40 dark:border-slate-800 shadow-sm">
+                <Building2 className="w-4.5 h-4.5 text-primary" />
+              </div>
             )}
           </div>
         </div>

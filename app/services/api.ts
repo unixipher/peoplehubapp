@@ -290,7 +290,7 @@ class ApiService {
 
   public static async getLeaveTypes(baseUrl: string, token: string): Promise<LeaveType[]> {
     const headers = this.getHeaders(baseUrl, token);
-    headers['x-target-path'] = '/api/v1/leave-type';
+    headers['x-target-path'] = '/api/v1/leave-type?limit=200';
 
     const response = await fetch('/api/proxy', {
       method: 'GET',
