@@ -100,7 +100,7 @@ export default function AttendanceView({ session }: AttendanceViewProps) {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col gap-6 pb-24 md:pb-6 font-sans">
+    <div className="w-full max-w-3xl mx-auto flex flex-col gap-6 pt-6 pb-24 md:pb-6 font-sans">
       
       {/* Header View */}
       <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">

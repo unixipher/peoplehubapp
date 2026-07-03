@@ -255,7 +255,7 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
   const totalClaims = expenses.length;
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col gap-6 pb-24 md:pb-6 font-sans">
+    <div className="w-full max-w-3xl mx-auto flex flex-col gap-6 pt-6 pb-24 md:pb-6 font-sans">
       
       {/* Dynamic Notifications */}
       {successMsg && (
