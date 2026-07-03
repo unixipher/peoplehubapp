@@ -156,6 +156,19 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
       return;
     }
 
+    // Custom Fields validation
+    for (const field of customFields) {
+      const fieldKey = `field_${field.id}`;
+      const isRequired = field.required === 'yes';
+      if (isRequired) {
+        const val = customFieldsValues[fieldKey];
+        if (!val || (Array.isArray(val) && val.length === 0)) {
+          setErrorMsg(`Please fill in the required field: ${field.label}`);
+          return;
+        }
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -478,6 +491,55 @@ export default function ExpensesView({ session, onBackToDashboard }: ExpensesVie
                     onChange={(e) => setCustomFieldsValues({ ...customFieldsValues, [fieldKey]: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:text-slate-200"
                   />
+                ) : field.type === 'file' ? (
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="file"
+                      id={`file-${field.id}`}
+                      accept="image/*,application/pdf"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setCustomFieldsValues({ ...customFieldsValues, [fieldKey]: file });
+                        }
+                      }}
+                    />
+                    <div 
+                      onClick={() => document.getElementById(`file-${field.id}`)?.click()}
+                      className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-950/20 hover:border-primary/50 transition-all text-center"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-primary-light dark:bg-slate-800 flex items-center justify-center text-primary">
+                        <Upload className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                        {customFieldsValues[fieldKey] ? 'Change File' : 'Attach File'}
+                      </span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                        {customFieldsValues[fieldKey] ? customFieldsValues[fieldKey].name : 'Upload JPEG, PNG or PDF (Max 5MB)'}
+                      </span>
+                    </div>
+                    
+                    {customFieldsValues[fieldKey] && (
+                      <div className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-350">
+                        <span className="truncate max-w-[85%]">{customFieldsValues[fieldKey].name}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const newVals = { ...customFieldsValues };
+                            delete newVals[fieldKey];
+                            setCustomFieldsValues(newVals);
+                            const inp = document.getElementById(`file-${field.id}`) as HTMLInputElement;
+                            if (inp) inp.value = '';
+                          }}
+                          className="text-red-500 hover:text-red-750 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <input
                     type={field.type === 'number' ? 'number' : 'text'}
