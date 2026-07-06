@@ -26,6 +26,7 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
   const [timeStr, setTimeStr] = useState('');
   const [dateStr, setDateStr] = useState('');
   const [isClockedIn, setIsClockedIn] = useState(false);
+  const [remainingClockIn, setRemainingClockIn] = useState<number>(1);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocationLoading, setIsLocationLoading] = useState(false);
@@ -61,15 +62,20 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
   // Fetch today's attendance status
   const fetchAttendanceStatus = async () => {
     try {
-      const record = await ApiService.getTodayAttendance(session.baseUrl, session.token);
+      const response = await ApiService.getTodayAttendance(session.baseUrl, session.token);
+      const record = response && response.attendance ? response.attendance : null;
+      const remaining = response && typeof response.remaining_clock_in !== 'undefined' ? response.remaining_clock_in : 1;
+      
       setActiveAttendanceRecord(record);
+      setRemainingClockIn(remaining);
+      
       const clockedIn = record !== null && 
         (!record.clock_out_time || 
          record.clock_out_time.toString().trim() === '' || 
          record.clock_out_time.toString().toLowerCase() === 'null');
       
       setIsClockedIn(clockedIn);
-      localStorage.setItem('ph_cache_today_attendance', JSON.stringify(record));
+      localStorage.setItem('ph_cache_today_attendance', JSON.stringify(response));
     } catch (err) {
       console.error('Failed to load active attendance status:', err);
     }
@@ -79,8 +85,13 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
     const cached = localStorage.getItem('ph_cache_today_attendance');
     if (cached) {
       try {
-        const record = JSON.parse(cached);
+        const response = JSON.parse(cached);
+        const record = response && response.attendance ? response.attendance : null;
+        const remaining = response && typeof response.remaining_clock_in !== 'undefined' ? response.remaining_clock_in : 1;
+        
         setActiveAttendanceRecord(record);
+        setRemainingClockIn(remaining);
+        
         const clockedIn = record !== null && 
           (!record.clock_out_time || 
            record.clock_out_time.toString().trim() === '' || 
@@ -299,11 +310,13 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
         <div className="mt-6">
           <button
             onClick={isClockedIn ? handleClockOut : handleClockIn}
-            disabled={isSubmitting}
+            disabled={isSubmitting || (!isClockedIn && remainingClockIn <= 0)}
             className={`w-full py-4 text-white font-bold rounded-2xl tracking-wider active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm ${
-              isClockedIn 
-                ? 'bg-red-500 hover:bg-red-600 shadow-red-200 dark:shadow-none' 
-                : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200 dark:shadow-none'
+              (!isClockedIn && remainingClockIn <= 0)
+                ? 'bg-slate-300 dark:bg-slate-800 text-slate-500 dark:text-slate-650 cursor-not-allowed shadow-none'
+                : isClockedIn 
+                  ? 'bg-red-500 hover:bg-red-600 shadow-red-200 dark:shadow-none' 
+                  : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200 dark:shadow-none'
             }`}
           >
             {isSubmitting ? (
@@ -313,6 +326,8 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
               </>
             ) : isClockedIn ? (
               'CLOCK OUT'
+            ) : remainingClockIn <= 0 ? (
+              'MAX CLOCK IN REACHED'
             ) : (
               'CLOCK IN'
             )}

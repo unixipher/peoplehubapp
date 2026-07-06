@@ -81,8 +81,12 @@ export default function HolidaysView({ session }: HolidaysViewProps) {
 
   const filteredHolidays = holidays.filter((h) => {
     const query = searchQuery.trim().toLowerCase();
+    const occasionLower = (h.occassion || '').toLowerCase();
+    if (['sunday', 'saturday', 'weekly off'].includes(occasionLower)) {
+      return false;
+    }
     if (!query) return true;
-    return (h.occassion || '').toLowerCase().includes(query) || (h.date || '').includes(query);
+    return occasionLower.includes(query) || (h.date || '').toLowerCase().includes(query);
   });
 
   return (

@@ -189,7 +189,7 @@ class ApiService {
     };
   }
 
-  public static async getTodayAttendance(baseUrl: string, token: string): Promise<AttendanceRecord | null> {
+  public static async getTodayAttendance(baseUrl: string, token: string): Promise<any> {
     const headers = this.getHeaders(baseUrl, token);
     headers['x-target-path'] = '/api/v1/attendance/today';
 
@@ -198,8 +198,7 @@ class ApiService {
       headers,
     });
 
-    const data = await this.handleResponse(response);
-    return data && data.attendance ? data.attendance : null;
+    return this.handleResponse(response);
   }
 
   public static async checkIn(
