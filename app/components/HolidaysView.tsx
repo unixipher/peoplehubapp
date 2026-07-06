@@ -30,14 +30,6 @@ export default function HolidaysView({ session }: HolidaysViewProps) {
 
     try {
       const list = await ApiService.getHolidays(session.baseUrl, session.token);
-      
-      // Sort: Latest date first
-      list.sort((a, b) => {
-        const dateA = new Date(a.date).getTime() || 0;
-        const dateB = new Date(b.date).getTime() || 0;
-        return dateB - dateA;
-      });
-
       setHolidays(list);
       localStorage.setItem('ph_cache_holidays', JSON.stringify(list));
     } catch (err: any) {
