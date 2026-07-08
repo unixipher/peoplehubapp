@@ -253,7 +253,7 @@ class ApiService {
     userId: string
   ): Promise<AttendanceRecord[]> {
     const headers = this.getHeaders(baseUrl, token);
-    headers['x-target-path'] = `/api/v1/attendance?limit=500&user_id=${userId}`;
+    headers['x-target-path'] = `/api/v1/attendance?limit=500&filters=user_id eq ${userId}`;
 
     const response = await fetch('/api/proxy', {
       method: 'GET',
