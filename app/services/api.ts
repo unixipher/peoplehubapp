@@ -18,8 +18,10 @@ export interface AttendanceRecord {
   clock_in_time: string;
   clock_out_time: string | null;
   work_from_type: string;
-  currentLatitude?: string;
-  currentLongitude?: string;
+  latitude?: string;
+  longitude?: string;
+  clock_out_latitude?: string;
+  clock_out_longitude?: string;
 }
 
 export interface HolidayRecord {

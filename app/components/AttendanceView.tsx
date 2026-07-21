@@ -212,12 +212,21 @@ export default function AttendanceView({ session }: AttendanceViewProps) {
                     </div>
 
                     {/* Footer Details: Coordinates if present */}
-                    {record.currentLatitude && record.currentLongitude && (
-                      <div className="flex justify-end items-center pt-2 border-t border-slate-50 dark:border-slate-800/30">
-                        <div className="flex items-center gap-1 text-[9px] text-slate-400 dark:text-slate-500 font-medium">
-                          <MapPin className="w-2.5 h-2.5" />
-                          <span>{parseFloat(record.currentLatitude).toFixed(4)}, {parseFloat(record.currentLongitude).toFixed(4)}</span>
-                        </div>
+                    {(record.latitude || record.clock_out_latitude) && (
+                      <div className="flex justify-between items-center pt-2 border-t border-slate-50 dark:border-slate-800/30">
+                        {record.latitude && record.longitude ? (
+                          <div className="flex items-center gap-1 text-[9px] text-slate-400 dark:text-slate-500 font-medium" title="Clock In Location">
+                            <MapPin className="w-2.5 h-2.5 text-emerald-500" />
+                            <span>In: {parseFloat(record.latitude).toFixed(4)}, {parseFloat(record.longitude).toFixed(4)}</span>
+                          </div>
+                        ) : <div/>}
+                        
+                        {record.clock_out_latitude && record.clock_out_longitude ? (
+                          <div className="flex items-center gap-1 text-[9px] text-slate-400 dark:text-slate-500 font-medium" title="Clock Out Location">
+                            <MapPin className="w-2.5 h-2.5 text-amber-500" />
+                            <span>Out: {parseFloat(record.clock_out_latitude).toFixed(4)}, {parseFloat(record.clock_out_longitude).toFixed(4)}</span>
+                          </div>
+                        ) : <div/>}
                       </div>
                     )}
 
