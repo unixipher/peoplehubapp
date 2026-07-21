@@ -141,7 +141,10 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
       setLongitude(lngStr);
     } catch (err: any) {
       console.warn('Geolocation capture failed or was denied:', err);
-      // We will still clock in with empty coords if permitted by backend, same as Flutter fallbacks
+      showNotification('Location access is required to clock in. Please enable location.', 'error');
+      setIsLocationLoading(false);
+      setIsSubmitting(false);
+      return;
     } finally {
       setIsLocationLoading(false);
     }
@@ -176,6 +179,10 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
       setLongitude(lngStr);
     } catch (err) {
       console.warn('Geolocation capture failed:', err);
+      showNotification('Location access is required to clock out. Please enable location.', 'error');
+      setIsLocationLoading(false);
+      setIsSubmitting(false);
+      return;
     } finally {
       setIsLocationLoading(false);
     }
