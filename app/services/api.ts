@@ -46,6 +46,7 @@ export interface LeaveType {
   quota_leaves: string;
   used_leaves: string;
   color?: string;
+  monthly_limit?: string;
 }
 
 export interface ExpenseRecord {

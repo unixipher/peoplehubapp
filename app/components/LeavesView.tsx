@@ -139,11 +139,32 @@ export default function LeavesView({ session, onBackToDashboard }: LeavesViewPro
   };
 
   // Leaves balance calculations: quota_leaves - used_leaves
-  const getCalculatedBalances = () => {
+  const getLeaveBalances = () => {
     return leaveTypes.map((type) => {
-      const quota = parseFloat(type.quota_leaves || '0') || 0;
-      const taken = parseFloat(type.used_leaves || '0') || 0;
-      const available = quota - taken;
+      let quota = parseFloat(type.quota_leaves || '0') || 0;
+      let taken = parseFloat(type.used_leaves || '0') || 0;
+
+      const monthlyLimit = parseFloat(type.monthly_limit || '0');
+      if (monthlyLimit > 0) {
+        quota = monthlyLimit;
+        
+        // Calculate taken leaves specifically for the current month
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        
+        taken = leaves
+          .filter(l => 
+            l.leave_type_id?.toString() === type.id.toString() && 
+            l.status === 'approved' &&
+            new Date(l.leave_date).getMonth() === currentMonth &&
+            new Date(l.leave_date).getFullYear() === currentYear
+          )
+          .reduce((sum, l) => sum + (l.duration === 'half day' ? 0.5 : 1), 0);
+      }
+
+      let available = quota - taken;
+      if (available < 0) available = 0;
+
       return {
         id: type.id,
         name: type.type_name || 'Leave',
@@ -258,7 +279,7 @@ export default function LeavesView({ session, onBackToDashboard }: LeavesViewPro
     return <IconComponent className="w-5 h-5" style={{ color }} />;
   };
 
-  const balances = getCalculatedBalances();
+  const balances = getLeaveBalances();
   const groupedLeaves = getGroupedLeaves();
 
   return (
