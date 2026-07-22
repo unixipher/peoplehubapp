@@ -112,17 +112,37 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
   };
 
   // Geolocation wrapper
+  const describeGeolocationError = (err: GeolocationPositionError): string => {
+    switch (err.code) {
+      case err.PERMISSION_DENIED:
+        return 'Location permission was denied. If you are using the mobile app, enable Location access for it in your phone Settings and try again.';
+      case err.POSITION_UNAVAILABLE:
+        return 'Your location could not be determined. Please check that Location/GPS is turned on.';
+      case err.TIMEOUT:
+        return 'Getting your location took too long. Please try again.';
+      default:
+        return err.message || 'Unable to retrieve your location.';
+    }
+  };
+
   const getCoordinates = (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject(new Error('Geolocation is not supported by your browser'));
         return;
       }
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      });
+      navigator.geolocation.getCurrentPosition(
+        resolve,
+        (err) => {
+          console.error('Geolocation error:', { code: err.code, message: err.message });
+          reject(new Error(describeGeolocationError(err)));
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
     });
   };
 
@@ -162,11 +182,7 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
       setLatitude(latStr);
       setLongitude(lngStr);
     } catch (err: any) {
-      console.error('Clock-in rejected:', err);
-      showNotification(err.message || 'Location coordinates are required for clock-in', 'error');
-      setIsLocationLoading(false);
-      setIsSubmitting(false);
-      return;
+      console.warn('Clock-in proceeding without location:', err);
     } finally {
       setIsLocationLoading(false);
     }
@@ -200,11 +216,7 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
       setLatitude(latStr);
       setLongitude(lngStr);
     } catch (err: any) {
-      console.error('Clock-out rejected:', err);
-      showNotification(err.message || 'Location coordinates are required for clock-out', 'error');
-      setIsLocationLoading(false);
-      setIsSubmitting(false);
-      return;
+      console.warn('Clock-out proceeding without location:', err);
     } finally {
       setIsLocationLoading(false);
     }
