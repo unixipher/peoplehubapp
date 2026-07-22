@@ -126,6 +126,29 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
     });
   };
 
+  // Function to verify if valid coordinates are coming, print them, or reject
+  const verifyCoordinates = async (): Promise<{ latStr: string; lngStr: string }> => {
+    const position = await getCoordinates();
+    const lat = position?.coords?.latitude;
+    const lng = position?.coords?.longitude;
+
+    if (lat === undefined || lat === null || lng === undefined || lng === null || isNaN(lat) || isNaN(lng)) {
+      throw new Error('Coordinates are not available. Clock-in/out rejected.');
+    }
+
+    const latStr = lat.toFixed(6);
+    const lngStr = lng.toFixed(6);
+
+    console.log('Location Coordinates:', {
+      latitude: lat,
+      longitude: lng,
+      latitudeFormatted: latStr,
+      longitudeFormatted: lngStr
+    });
+
+    return { latStr, lngStr };
+  };
+
   const handleClockIn = async () => {
     setIsSubmitting(true);
     setIsLocationLoading(true);
@@ -133,15 +156,14 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
     let lngStr = '';
 
     try {
-      // Get browser geolocation
-      const position = await getCoordinates();
-      latStr = position.coords.latitude.toFixed(6);
-      lngStr = position.coords.longitude.toFixed(6);
+      const coords = await verifyCoordinates();
+      latStr = coords.latStr;
+      lngStr = coords.lngStr;
       setLatitude(latStr);
       setLongitude(lngStr);
     } catch (err: any) {
-      console.warn('Geolocation capture failed or was denied:', err);
-      showNotification('Location access is required to clock in. Please enable location.', 'error');
+      console.error('Clock-in rejected:', err);
+      showNotification(err.message || 'Location coordinates are required for clock-in', 'error');
       setIsLocationLoading(false);
       setIsSubmitting(false);
       return;
@@ -172,14 +194,14 @@ export default function DashboardView({ session, onNavigateToTab }: DashboardVie
     let lngStr = '';
 
     try {
-      const position = await getCoordinates();
-      latStr = position.coords.latitude.toFixed(6);
-      lngStr = position.coords.longitude.toFixed(6);
+      const coords = await verifyCoordinates();
+      latStr = coords.latStr;
+      lngStr = coords.lngStr;
       setLatitude(latStr);
       setLongitude(lngStr);
-    } catch (err) {
-      console.warn('Geolocation capture failed:', err);
-      showNotification('Location access is required to clock out. Please enable location.', 'error');
+    } catch (err: any) {
+      console.error('Clock-out rejected:', err);
+      showNotification(err.message || 'Location coordinates are required for clock-out', 'error');
       setIsLocationLoading(false);
       setIsSubmitting(false);
       return;
